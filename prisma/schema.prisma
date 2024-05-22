@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Age {
+  PUPPY
+  ADULT
+  SENIOR
+}
+
+enum EnergyLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Size {
+  SMALL
+  MEDIUM
+  BIG
+  GIANT
+}
+
+enum Ambient {
+  SMALL
+  MEDIUM
+  BIG
+  GIANT
+}
+
+enum IndependenceLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Pet {
+  id                String            @id @default(uuid())
+  name              String
+  description       String?
+  age               Age
+  ambient           Ambient
+  independenceLevel IndependenceLevel @map("independence_level")
+  size              Size
+  energyLevel       EnergyLevel       @default(LOW) @map("energy_level")
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @updatedAt
+
+  adoptionRequirements AdoptionRequirements[]
+  images               ImagePet[]
+
+  org    Org    @relation(fields: [org_id], references: [id], onDelete: Cascade)
+  org_id String
+
+  @@map("pets")
+}
+
+model AdoptionRequirements {
+  id          String   @id @default(uuid())
+  description String
+  pet_id      String
+  created_at  DateTime @default(now())
+
+  pet Pet @relation(fields: [pet_id], references: [id], onDelete: Cascade)
+}
+
+model ImagePet {
+  id         String   @id @default(uuid())
+  path       String
+  pet_id     String
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  pet Pet @relation(fields: [pet_id], references: [id], onDelete: Cascade)
+}
+
+model Org {
+  id              String  @id @default(uuid())
+  title           String
+  nameAccountable String  @map("name_accountable")
+  email           String  @unique
+  passwordHash    String  @map("password_hash")
+  postalCode      String  @map("postal_code")
+  city            String
+  state           String
+  address         String
+  whatsapp        String
+  latitude        Decimal
+  longitude       Decimal
+
+  pets Pet[]
+}
